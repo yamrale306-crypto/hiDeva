@@ -1,4 +1,4 @@
-﻿import express from 'express';
+import express from 'express';
 import http from 'http';
 import attachStreamEndpoint from './routes/stream';
 

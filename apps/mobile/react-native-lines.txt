@@ -1,4 +1,4 @@
-﻿
+
 tsresolve.log:72:Found 'package.json' at 'C:/Users/admin/Desktop/hideva-export/
 node_modules/.pnpm/expo-status-bar@56.0.4_expo_f77db0b0a30bea42f4aad9637a88fa6b
 /node_modules/react-native/package.json'.
