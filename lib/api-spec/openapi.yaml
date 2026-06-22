@@ -1,0 +1,349 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: hiDeva Call Assistant API — Exotel integration, call screening, and management
+servers:
+  - url: /api
+    description: Base API path
+
+tags:
+  - name: health
+    description: Health check endpoint
+  - name: calls
+    description: Call lifecycle, webhooks, and screening
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /calls/webhook:
+    post:
+      operationId: handleExotelWebhook
+      tags: [calls]
+      summary: Exotel call webhook
+      description: |
+        Receives call events from Exotel AgentStream.
+        Call flow: initiated → screening → (forwarded | blocked) → completed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExotelWebhookPayload"
+      responses:
+        "200":
+          description: Webhook processed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookResponse"
+        "400":
+          description: Invalid webhook payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized (invalid signature)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /calls/{callId}:
+    get:
+      operationId: getCall
+      tags: [calls]
+      summary: Get call details
+      description: Retrieve full call record, transcripts, and metadata
+      parameters:
+        - name: callId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Call details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CallDetail"
+        "404":
+          description: Call not found
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+      required:
+        - status
+
+    # ========================================================================
+    # Exotel Webhook Payload
+    # ========================================================================
+
+    ExotelWebhookPayload:
+      type: object
+      description: |
+        Exotel sends this payload to your webhook endpoint when a call event occurs.
+        Signature validation (HMAC-SHA256) is required.
+      properties:
+        callSid:
+          type: string
+          description: Unique call identifier from Exotel
+          example: "c6d28b60-19fe-11ef-9200-0242ac140052"
+        
+        callStatus:
+          type: string
+          enum: [initiated, screening, forwarded, completed, blocked]
+          description: Current status of the call
+          example: "initiated"
+        
+        callerNumber:
+          type: string
+          description: Caller's phone number (E.164 format preferred)
+          example: "+919876543210"
+        
+        callerName:
+          type: string
+          description: Optional caller ID name
+          example: "Mom"
+        
+        userId:
+          type: string
+          format: uuid
+          description: hiDeva user ID (passed by Exotel or your system)
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        
+        timestamp:
+          type: string
+          format: date-time
+          description: When Exotel generated this event
+          example: "2025-01-28T14:30:00Z"
+        
+        # Language detection & intent (if available from prior screening)
+        detectedLanguage:
+          type: string
+          description: Language detected from caller (ISO 639-1 code)
+          example: "hi"
+          enum: [en, hi, mr, gu, kn, ta, te, ml]
+        
+        callerIntent:
+          type: string
+          description: |
+            Caller's stated purpose/intent (captured during screening greeting).
+            e.g., "order food", "technical support", "bill inquiry"
+          example: "order food"
+        
+        disposition:
+          type: string
+          enum: [pending, forwarded, blocked, recorded, voicemail]
+          description: Screening decision for this call
+          example: "pending"
+        
+        # Transcript segments (real-time updates)
+        transcripts:
+          type: array
+          description: Array of transcript segments captured so far
+          items:
+            $ref: "#/components/schemas/TranscriptSegment"
+        
+        # Recording metadata
+        recordingUrl:
+          type: string
+          format: uri
+          description: URL to the call recording (if available)
+          example: "https://s3.example.com/calls/c6d28b60-19fe-11ef-9200-0242ac140052.wav"
+        
+        recordingDurationSeconds:
+          type: integer
+          description: Duration of recording in seconds
+          example: 45
+        
+        # Optional: signature for webhook validation
+        signature:
+          type: string
+          description: HMAC-SHA256 signature (optional, for verification)
+          example: "abcdef123456..."
+
+      required:
+        - callSid
+        - callStatus
+        - callerNumber
+        - userId
+        - timestamp
+
+    TranscriptSegment:
+      type: object
+      description: A single transcript turn (one speaker's utterance)
+      properties:
+        speaker:
+          type: string
+          enum: [caller, deva]
+          description: Who spoke
+        
+        text:
+          type: string
+          description: What they said
+          example: "I want to order a pizza"
+        
+        language:
+          type: string
+          description: Language code for this segment
+          example: "hi"
+        
+        offsetSeconds:
+          type: number
+          description: When in the call this was spoken (seconds)
+          example: 5.2
+
+      required:
+        - speaker
+        - text
+
+    # ========================================================================
+    # Response Schemas
+    # ========================================================================
+
+    WebhookResponse:
+      type: object
+      description: Confirmation that webhook was processed
+      properties:
+        success:
+          type: boolean
+          example: true
+        
+        callSid:
+          type: string
+          description: The call ID we processed
+          example: "c6d28b60-19fe-11ef-9200-0242ac140052"
+        
+        nextAction:
+          type: string
+          enum: [forward, block, record, voicemail]
+          description: What Deva decided to do with this call
+          example: "forward"
+        
+        message:
+          type: string
+          description: Optional status message
+          example: "Call screened and forwarded to user"
+
+      required:
+        - success
+        - callSid
+        - nextAction
+
+    CallDetail:
+      type: object
+      description: Full call record with all metadata and transcripts
+      properties:
+        id:
+          type: string
+          format: uuid
+        
+        userId:
+          type: string
+          format: uuid
+        
+        telephonyCallSid:
+          type: string
+        
+        callerNumber:
+          type: string
+        
+        callerName:
+          type: string
+          nullable: true
+        
+        status:
+          type: string
+          enum: [initiated, screening, forwarded, completed, blocked]
+        
+        disposition:
+          type: string
+          enum: [pending, forwarded, blocked, recorded, voicemail]
+        
+        detectedLanguage:
+          type: string
+        
+        callerIntent:
+          type: string
+          nullable: true
+        
+        callSummary:
+          type: string
+          nullable: true
+          description: AI-generated summary of the call
+        
+        recordingUrl:
+          type: string
+          nullable: true
+        
+        recordingDurationSeconds:
+          type: integer
+          nullable: true
+        
+        callStartedAt:
+          type: string
+          format: date-time
+          nullable: true
+        
+        callEndedAt:
+          type: string
+          format: date-time
+          nullable: true
+        
+        transcripts:
+          type: array
+          items:
+            $ref: "#/components/schemas/TranscriptSegment"
+        
+        createdAt:
+          type: string
+          format: date-time
+        
+        updatedAt:
+          type: string
+          format: date-time
+
+      required:
+        - id
+        - userId
+        - telephonyCallSid
+        - callerNumber
+        - status
+        - disposition
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Invalid request payload"
+        
+        code:
+          type: string
+          example: "INVALID_PAYLOAD"
+
+      required:
+        - error
+        - code
