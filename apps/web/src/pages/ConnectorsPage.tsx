@@ -1,10 +1,10 @@
 import { ConnectorCard } from '@/components/ui/ConnectorCard';
 
 const connectors = [
-  { name: 'Supabase', status: 'Connected', description: 'Database, auth, storage, and realtime.' },
-  { name: 'OpenAI', status: 'Disconnected', description: 'AI model access for chat and agents.' },
-  { name: 'GitHub', status: 'Connected', description: 'Repository, issue, and commit insights.' },
-  { name: 'Slack', status: 'Disconnected', description: 'Team chat and notifications.' },
+  { name: 'Supabase', status: 'Connected' as const, description: 'Database, auth, storage, and realtime.' },
+  { name: 'OpenAI', status: 'Disconnected' as const, description: 'AI model access for chat and agents.' },
+  { name: 'GitHub', status: 'Connected' as const, description: 'Repository, issue, and commit insights.' },
+  { name: 'Slack', status: 'Disconnected' as const, description: 'Team chat and notifications.' },
 ];
 
 export function ConnectorsPage() {
