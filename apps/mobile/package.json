@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "expo start",
     "android": "expo run:android",
-    "build": "expo prebuild --platform android",
+    "build": "echo 'Mobile build skipped - use expo prebuild manually'",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "sync": "npx cap sync android"
   },

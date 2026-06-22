@@ -1,4 +1,4 @@
-﻿/*
+/*
  * src/routes/stream.ts
  * WebSocket endpoint scaffolding for /api/telephony/stream
  * - Accepts WebSocket handshakes

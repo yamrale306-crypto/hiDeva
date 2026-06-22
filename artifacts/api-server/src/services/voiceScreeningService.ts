@@ -19,7 +19,7 @@
 import { db } from '@workspace/db';
 import {
   voiceScreeningSessions,
-  callTranscripts,
+  voiceCallTranscripts as callTranscripts,
   safetyEvents,
   type VoiceScreeningSession,
   type InsertVoiceScreeningSession,
@@ -76,20 +76,11 @@ export class VoiceScreeningService {
         })
         .returning();
 
-      logger.info('Voice screening session created', {
-        sessionId: session[0].id,
-        callId,
-        userId,
-        websocketSessionId,
-      });
+      logger.info({ sessionId: session[0].id, callId, userId, websocketSessionId }, 'Voice screening session created');
 
       return session[0];
     } catch (error) {
-      logger.error('Failed to create voice screening session', {
-        error: error instanceof Error ? error.message : String(error),
-        callId,
-        userId,
-      });
+      logger.error({ error: error instanceof Error ? error.message : String(error), callId, userId }, 'Failed to create voice screening session');
       throw error;
     }
   }
@@ -132,18 +123,11 @@ export class VoiceScreeningService {
         .where(eq(voiceScreeningSessions.id, sessionId))
         .returning();
 
-      logger.info('Greeting sent to caller', {
-        sessionId,
-        prompt: greetingPrompt,
-        timestamp: new Date().toISOString(),
-      });
+      logger.info({ sessionId, prompt: greetingPrompt, timestamp: new Date().toISOString() }, 'Greeting sent to caller');
 
       return updated[0];
     } catch (error) {
-      logger.error('Failed to send greeting', {
-        error: error instanceof Error ? error.message : String(error),
-        sessionId,
-      });
+      logger.error({ error: error instanceof Error ? error.message : String(error), sessionId }, 'Failed to send greeting');
       throw error;
     }
   }
@@ -178,19 +162,9 @@ export class VoiceScreeningService {
         language: 'en',
       });
 
-      logger.debug('Transcript logged', {
-        sessionId,
-        speaker,
-        textLength: text.length,
-        startTimeMs,
-        endTimeMs,
-      });
+      logger.debug({ sessionId, speaker, textLength: text.length, startTimeMs, endTimeMs }, 'Transcript logged');
     } catch (error) {
-      logger.error('Failed to log transcript', {
-        error: error instanceof Error ? error.message : String(error),
-        sessionId,
-        speaker,
-      });
+      logger.error({ error: error instanceof Error ? error.message : String(error), sessionId, speaker }, 'Failed to log transcript');
       // Don't throw; transcription failures shouldn't block the call
     }
   }
@@ -242,27 +216,14 @@ export class VoiceScreeningService {
         detectionMethod: 'heuristic', // TODO: Update based on actual detection method
       });
 
-      logger.warn('Safety event logged', {
-        sessionId,
-        eventType,
-        severity,
-        actionTaken,
-      });
+      logger.warn({ sessionId, eventType, severity, actionTaken }, 'Safety event logged');
 
       // TODO (Phase 3 Week 3): Route critical events to monitoring dashboard
       if (severity === 'critical') {
-        logger.error('CRITICAL SAFETY EVENT', {
-          sessionId,
-          eventType,
-          description,
-        });
+        logger.error({ sessionId, eventType, description }, 'CRITICAL SAFETY EVENT');
       }
     } catch (error) {
-      logger.error('Failed to log safety event', {
-        error: error instanceof Error ? error.message : String(error),
-        sessionId,
-        eventType,
-      });
+      logger.error({ error: error instanceof Error ? error.message : String(error), sessionId, eventType }, 'Failed to log safety event');
       // Don't throw; event logging shouldn't block the call
     }
   }
@@ -303,21 +264,13 @@ export class VoiceScreeningService {
         throw new Error(`Session ${sessionId} not found`);
       }
 
-      logger.info('Voice screening session completed', {
-        sessionId,
-        disposition,
-        reason,
-        duration: updated[0].startedAt
+      logger.info({ sessionId, disposition, reason, duration: updated[0].startedAt
           ? now.getTime() - updated[0].startedAt.getTime()
-          : undefined,
-      });
+          : undefined }, 'Voice screening session completed');
 
       return updated[0];
     } catch (error) {
-      logger.error('Failed to complete voice screening session', {
-        error: error instanceof Error ? error.message : String(error),
-        sessionId,
-      });
+      logger.error({ error: error instanceof Error ? error.message : String(error), sessionId }, 'Failed to complete voice screening session');
       throw error;
     }
   }
@@ -359,17 +312,11 @@ export class VoiceScreeningService {
         'logged'
       );
 
-      logger.error('Voice screening session failed', {
-        sessionId,
-        error: errorMessage,
-      });
+      logger.error({ sessionId, error: errorMessage }, 'Voice screening session failed');
 
       return updated[0];
     } catch (error) {
-      logger.error('Failed to mark session as failed', {
-        error: error instanceof Error ? error.message : String(error),
-        sessionId,
-      });
+      logger.error({ error: error instanceof Error ? error.message : String(error), sessionId }, 'Failed to mark session as failed');
       throw error;
     }
   }
@@ -416,10 +363,7 @@ export class VoiceScreeningService {
         safetyEvents: events,
       };
     } catch (error) {
-      logger.error('Failed to get session history', {
-        error: error instanceof Error ? error.message : String(error),
-        sessionId,
-      });
+      logger.error({ error: error instanceof Error ? error.message : String(error), sessionId }, 'Failed to get session history');
       throw error;
     }
   }

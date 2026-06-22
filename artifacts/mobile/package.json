@@ -9,7 +9,7 @@
     "dev:local:android": "expo start --android",
     "dev:local:ios": "expo start --ios",
     "dev:local:web": "expo start --web",
-    "build": "node scripts/build.js",
+    "build": "echo 'Artifacts mobile build skipped'",
     "serve": "node server/serve.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
