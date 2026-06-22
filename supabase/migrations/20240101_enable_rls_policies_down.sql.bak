@@ -1,0 +1,139 @@
+-- hiDeva Row Level Security Migration - DOWN
+-- Generated: 2024
+-- Purpose: Revert RLS enablement and policy creation
+-- Reverses: 20240101_enable_rls_policies.sql
+
+-- ============================================================================
+-- DROP ALL POLICIES
+-- ============================================================================
+
+-- Drop profiles policies
+drop policy if exists "Users can view own profile" on profiles;
+drop policy if exists "Users can insert own profile" on profiles;
+drop policy if exists "Users can update own profile" on profiles;
+drop policy if exists "Users can delete own profile" on profiles;
+
+-- Drop notes policies
+drop policy if exists "Users can view own notes" on notes;
+drop policy if exists "Users can insert own notes" on notes;
+drop policy if exists "Users can update own notes" on notes;
+drop policy if exists "Users can delete own notes" on notes;
+
+-- Drop tasks policies
+drop policy if exists "Users can view own tasks" on tasks;
+drop policy if exists "Users can insert own tasks" on tasks;
+drop policy if exists "Users can update own tasks" on tasks;
+drop policy if exists "Users can delete own tasks" on tasks;
+
+-- Drop events policies
+drop policy if exists "Users can view own events" on events;
+drop policy if exists "Users can insert own events" on events;
+drop policy if exists "Users can update own events" on events;
+drop policy if exists "Users can delete own events" on events;
+
+-- Drop projects policies
+drop policy if exists "Users can view own projects" on projects;
+drop policy if exists "Users can insert own projects" on projects;
+drop policy if exists "Users can update own projects" on projects;
+drop policy if exists "Users can delete own projects" on projects;
+
+-- Drop documents policies
+drop policy if exists "Users can view own documents" on documents;
+drop policy if exists "Users can insert own documents" on documents;
+drop policy if exists "Users can update own documents" on documents;
+drop policy if exists "Users can delete own documents" on documents;
+
+-- Drop memories policies
+drop policy if exists "Users can view own memories" on memories;
+drop policy if exists "Users can insert own memories" on memories;
+drop policy if exists "Users can update own memories" on memories;
+drop policy if exists "Users can delete own memories" on memories;
+
+-- Drop agents policies
+drop policy if exists "Users can view own agents" on agents;
+drop policy if exists "Users can insert own agents" on agents;
+drop policy if exists "Users can update own agents" on agents;
+drop policy if exists "Users can delete own agents" on agents;
+
+-- Drop workflows policies
+drop policy if exists "Users can view own workflows" on workflows;
+drop policy if exists "Users can insert own workflows" on workflows;
+drop policy if exists "Users can update own workflows" on workflows;
+drop policy if exists "Users can delete own workflows" on workflows;
+
+-- Drop conversations policies
+drop policy if exists "Users can view own conversations" on conversations;
+drop policy if exists "Users can insert own conversations" on conversations;
+drop policy if exists "Users can update own conversations" on conversations;
+drop policy if exists "Users can delete own conversations" on conversations;
+
+-- Drop connectors policies
+drop policy if exists "Users can view own connectors" on connectors;
+drop policy if exists "Users can insert own connectors" on connectors;
+drop policy if exists "Users can update own connectors" on connectors;
+drop policy if exists "Users can delete own connectors" on connectors;
+
+-- Drop calls policies
+drop policy if exists "Users can view own calls" on calls;
+drop policy if exists "Users can insert own calls" on calls;
+drop policy if exists "Users can update own calls" on calls;
+drop policy if exists "Users can delete own calls" on calls;
+
+-- Drop contacts policies
+drop policy if exists "Users can view own contacts" on contacts;
+drop policy if exists "Users can insert own contacts" on contacts;
+drop policy if exists "Users can update own contacts" on contacts;
+drop policy if exists "Users can delete own contacts" on contacts;
+
+-- Drop routing_rules policies
+drop policy if exists "Users can view own routing rules" on routing_rules;
+drop policy if exists "Users can insert own routing rules" on routing_rules;
+drop policy if exists "Users can update own routing rules" on routing_rules;
+drop policy if exists "Users can delete own routing rules" on routing_rules;
+
+-- Drop voice_screening_sessions policies
+drop policy if exists "Users can view own voice screening sessions" on voice_screening_sessions;
+drop policy if exists "Users can insert own voice screening sessions" on voice_screening_sessions;
+drop policy if exists "Users can update own voice screening sessions" on voice_screening_sessions;
+drop policy if exists "Users can delete own voice screening sessions" on voice_screening_sessions;
+
+-- Drop call_transcripts policies
+drop policy if exists "Users can view own call transcripts" on call_transcripts;
+drop policy if exists "Users can insert own call transcripts" on call_transcripts;
+drop policy if exists "Users can update own call transcripts" on call_transcripts;
+drop policy if exists "Users can delete own call transcripts" on call_transcripts;
+
+-- Drop safety_events policies
+drop policy if exists "Users can view own safety events" on safety_events;
+drop policy if exists "Users can insert own safety events" on safety_events;
+drop policy if exists "Users can update own safety events" on safety_events;
+drop policy if exists "Users can delete own safety events" on safety_events;
+
+-- ============================================================================
+-- DISABLE RLS ON ALL TABLES
+-- ============================================================================
+
+alter table profiles disable row level security;
+alter table notes disable row level security;
+alter table tasks disable row level security;
+alter table events disable row level security;
+alter table projects disable row level security;
+alter table documents disable row level security;
+alter table memories disable row level security;
+alter table agents disable row level security;
+alter table workflows disable row level security;
+alter table conversations disable row level security;
+alter table connectors disable row level security;
+
+alter table calls disable row level security;
+alter table contacts disable row level security;
+alter table routing_rules disable row level security;
+alter table call_transcripts disable row level security;
+alter table voice_screening_sessions disable row level security;
+alter table safety_events disable row level security;
+
+-- ============================================================================
+-- DROP HELPER FUNCTION
+-- ============================================================================
+
+drop function if exists auth.uid();
